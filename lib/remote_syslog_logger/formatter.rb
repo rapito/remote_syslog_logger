@@ -73,7 +73,7 @@ module RemoteSyslogLogger
 		# @param progname [String] the progname scope for the log message
 		# @param message [String] Human readable log message.
 		# @return [LogEntry] the resulting LogEntry object
-		def initialize(level, severity, time, progname, message, event, options = {})
+		def initialize(level, severity, time, progname, message, options = {})
 			@level = level
 			@severity = severity
 			@time = time.utc
@@ -91,9 +91,9 @@ module RemoteSyslogLogger
 		def to_hash(options = {})
 			options ||= {}
 			hash = {
-					:level => level,
-					:dt => formatted_dt,
-					:message => message
+					level: level,
+					dt: formatted_dt,
+					message: message
 			}
 
 			if !tags.nil? && tags.length > 0
@@ -133,7 +133,6 @@ module RemoteSyslogLogger
 			to_hash.to_msgpack(*args)
 		end
 
-		# This is used when LogEntry objects make it to a non-Timber logger.
 		def to_s
 			message + "\n"
 		end
@@ -148,9 +147,9 @@ module RemoteSyslogLogger
 		# If it fails, a nil is returned.
 		def encode_string(string)
 			string.encode('UTF-8', {
-					:invalid => :replace,
-					:undef => :replace,
-					:replace => '?'
+					invalid: :replace,
+					undef: :replace,
+					replace: '?'
 			})
 		rescue Exception
 			nil
