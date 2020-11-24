@@ -4,11 +4,12 @@ require 'syslog_protocol'
 module RemoteSyslogLogger
   class UdpSender
     def initialize(remote_hostname, remote_port, options = {})
+
       @remote_hostname = remote_hostname
       @remote_port     = remote_port
       @whinyerrors     = options[:whinyerrors]
       @max_size        = options[:max_size]
-      
+
       @socket = UDPSocket.new
       @packet = SyslogProtocol::Packet.new
 
@@ -20,13 +21,15 @@ module RemoteSyslogLogger
       @packet.severity = options[:severity] || 'notice'
       @packet.tag      = options[:program]  || "#{File.basename($0)}[#{$$}]"
     end
-    
-    def transmit(message)
+
+    def transmit(entry)
+      message = entry.respond_to?(:message) ? entry.message : entry
       message.split(/\r?\n/).each do |line|
         begin
           next if line =~ /^\s*$/
           packet = @packet.dup
           packet.content = line
+					packet.severity = entry.severity if entry.respond_to?(:severity)
           payload = @max_size ? packet.assemble(@max_size) : packet.assemble
           @socket.send(payload, 0, @remote_hostname, @remote_port)
         rescue
@@ -35,10 +38,10 @@ module RemoteSyslogLogger
         end
       end
     end
-    
+
     # Make this act a little bit like an `IO` object
     alias_method :write, :transmit
-    
+
     def close
       @socket.close
     end
