@@ -24,6 +24,7 @@ module RemoteSyslogLogger
 
     def transmit(entry)
       message = entry.respond_to?(:message) ? entry.message : entry
+      message = "[#{entry.raw_severity}] #{message}"
       message.split(/\r?\n/).each do |line|
         begin
           next if line =~ /^\s*$/

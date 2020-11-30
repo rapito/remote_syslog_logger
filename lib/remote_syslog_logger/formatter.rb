@@ -41,9 +41,9 @@ module RemoteSyslogLogger
 
 				message = logged_obj.delete(:message)
 
-				LogEntry.new(level, mapped_severity, time, progname, message, tags: tags)
+				LogEntry.new(level, severity, mapped_severity, time, progname, message, tags: tags)
 			else
-				LogEntry.new(level, mapped_severity, time, progname, logged_obj, tags: tags)
+				LogEntry.new(level, severity, mapped_severity, time, progname, logged_obj, tags: tags)
 			end
 		end
 
@@ -64,18 +64,20 @@ module RemoteSyslogLogger
 		DT_PRECISION = 6.freeze
 		MESSAGE_MAX_BYTES = 8192.freeze
 
-		attr_reader :event, :level, :severity, :message, :progname, :tags, :time
+		attr_reader :event, :level, :raw_severity, :severity, :message, :progname, :tags, :time
 
 		# Creates a log entry suitable to be sent to the Timber API.
 		# @param level [Integer] the log level / severity
+		# @param raw_severity [String] the log level
 		# @param severity [Integer] the log level severity
 		# @param time [Time] the exact time the log message was written
 		# @param progname [String] the progname scope for the log message
 		# @param message [String] Human readable log message.
 		# @return [LogEntry] the resulting LogEntry object
-		def initialize(level, severity, time, progname, message, options = {})
+		def initialize(level, raw_severity, severity, time, progname, message, options = {})
 			@level = level
 			@severity = severity
+			@raw_severity = raw_severity
 			@time = time.utc
 			@progname = progname
 
